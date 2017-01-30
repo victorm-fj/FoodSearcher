@@ -40,6 +40,40 @@ const styles = StyleSheet.create({
   },
 });
 
+// error callback function for openDatabase operation
+const errorCB = (err) => {
+  console.log(`SQL Error: ${err}`);
+};
+
+// success callback function for openDatabase operation
+const successCB = () => {
+  console.log('SQL executed fine');
+};
+
+const db = SQLite.openDatabase({
+  name: 'foodsDB', readOnly: true, createFromLocation: 1,
+}, successCB, errorCB);
+
+// 'food' being table name, item(0) is column names
+// so we set limit 2 to retrieve the first food values
+db.executeSql('SELECT * FROM food LIMIT 2', [],
+(results) => {
+  console.log(results.rows.item(1));
+},
+(error) => {
+  console.log(error);
+});
+
+// sql query that counts db rows
+db.executeSql('SELECT count(*) AS mycount FROM food', [],
+(rs) => {
+  console.log(`Record count (expected to be 8791): ${rs.rows.item(0).mycount}`);
+},
+(error) => {
+  console.log(`SELECT SQL statement ERROR: ${error.message}`);
+});
+
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -51,42 +85,48 @@ class App extends Component {
   // onChangeTextHandler arrow function (automatically binds context)
   onChangeTextHandler = (text) => {
     this.setState({ value: text });
+    this.searchFood(text);
   }
 
-  // error callback function for openDatabase operation
-  errorCB = (err) => {
-    console.log(`SQL Error: ${err}`);
-  }
+  searchFood = (food) => {
+    // retireved foods will be pushed into this array
+    const foodsArray = [];
 
-  // success callback function for openDatabase operation
-  successCB = () => {
-    console.log('SQL executed fine');
-  }
+    // if food equals to empty string, do nothing and return empty foodsArray
+    if (food === '') {
+      return foodsArray;
+    }
 
-  render() {
-    const db = SQLite.openDatabase({
-      name: 'foodsDB', readOnly: true, createFromLocation: 1,
-    }, this.successCB, this.errorCB);
+    // regex that indicates a string containing substring (searchTerm)
+    const searchTerm = `%${food}%`;
+    // LIKE means we're not doing an exact match (column = value),
+    // but doing some more fuzzy matching.
+    const query = `SELECT * FROM food WHERE desc LIKE '${searchTerm}' LIMIT 20`;
 
-    // 'food' being table name, item(0) is column names
-    // so we set limit 2 to retrieve the first food values
-    db.executeSql('SELECT * FROM food LIMIT 2', [],
+    db.executeSql(query, [],
     (results) => {
-      console.log(results.rows.item(1));
+      // console.log(results);
+      // length of results
+      const length = results.rows.length;
+
+      let i = 0;
+      // iterate over results.rows.item
+      for (; i < length; i += 1) {
+        // console.log(results.rows.item(i));
+        // push every object to foodsArray
+        foodsArray.push(results.rows.item(i));
+      }
     },
     (error) => {
       console.log(error);
     });
 
-    // sql query that counts db rows
-    db.executeSql('SELECT count(*) AS mycount FROM food', [],
-    (rs) => {
-      console.log(`Record count (expected to be 8791): ${rs.rows.item(0).mycount}`);
-    },
-    (error) => {
-      console.log(`SELECT SQL statement ERROR: ${error.message}`);
-    });
+    // return query results in foodsArray
+    console.log(foodsArray);
+    return foodsArray;
+  }
 
+  render() {
     return (
       <View style={styles.container}>
         <View style={styles.searchBar}>
