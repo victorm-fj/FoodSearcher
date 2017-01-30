@@ -3,15 +3,24 @@ import {
   StyleSheet,
   Text,
   View,
+  TextInput,
 } from 'react-native';
 import SQLite from 'react-native-sqlite-storage';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
+  },
+  searchBar: {
+    flexDirection: 'row',
+    height: 56,
+    width: 500,
+    backgroundColor: '#212121',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
     fontSize: 20,
@@ -23,9 +32,27 @@ const styles = StyleSheet.create({
     color: '#333333',
     marginBottom: 5,
   },
+  input: {
+    width: 250,
+    color: '#fff',
+    fontSize: 16,
+    marginLeft: 10,
+  },
 });
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: '',
+    };
+  }
+
+  // onChangeTextHandler arrow function (automatically binds context)
+  onChangeTextHandler = (text) => {
+    this.setState({ value: text });
+  }
+
   // error callback function for openDatabase operation
   errorCB = (err) => {
     console.log(`SQL Error: ${err}`);
@@ -62,11 +89,28 @@ class App extends Component {
 
     return (
       <View style={styles.container}>
+        <View style={styles.searchBar}>
+          <Icon
+            size={18}
+            name="search"
+            color="#fff"
+          />
+          <TextInput
+            value={this.state.value}
+            onChangeText={this.onChangeTextHandler}
+            style={styles.input}
+            underlineColorAndroid="#fff"
+          />
+        </View>
+
         <Text style={styles.title}>
           React Native local SQlite3 USDA foods database
         </Text>
         <Text style={styles.text}>
           react-native-sqlite-storage implementation
+        </Text>
+        <Text style={styles.text}>
+          {this.state.value}
         </Text>
       </View>
     );

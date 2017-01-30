@@ -9,7 +9,8 @@
   "dependencies": {
     "react": "15.4.2",
     "react-native": "0.40.0",
-    "react-native-sqlite-storage": "git+https://github.com/andpor/react-native-sqlite-storage.git"
+    "react-native-sqlite-storage": "git+https://github.com/andpor/react-native-sqlite-storage.git",
+    "react-native-vector-icons": "^4.0.0"
   },
   "devDependencies": {
     "babel-eslint": "^7.1.1",
