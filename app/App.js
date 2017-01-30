@@ -79,13 +79,14 @@ class App extends Component {
     super(props);
     this.state = {
       value: '',
+      foods: [],
     };
   }
 
   // onChangeTextHandler arrow function (automatically binds context)
   onChangeTextHandler = (text) => {
-    this.setState({ value: text });
-    this.searchFood(text);
+    const foods = this.searchFood(text);
+    this.setState({ value: text, foods });
   }
 
   searchFood = (food) => {
@@ -122,11 +123,12 @@ class App extends Component {
     });
 
     // return query results in foodsArray
-    console.log(foodsArray);
+    // console.log(foodsArray);
     return foodsArray;
   }
 
   render() {
+    console.log(this.state);
     return (
       <View style={styles.container}>
         <View style={styles.searchBar}>
