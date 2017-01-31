@@ -6,5 +6,6 @@
     "no-console": 0,
     "class-methods-use-this": 0,
     "react/no-unescaped-entities": 0,
+    "react/forbid-prop-types": 0,
   }
 }

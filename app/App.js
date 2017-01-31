@@ -8,6 +8,8 @@ import {
 import SQLite from 'react-native-sqlite-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
+import FoodList from './components/FoodList';
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -30,7 +32,7 @@ const styles = StyleSheet.create({
   text: {
     textAlign: 'center',
     color: '#333333',
-    marginBottom: 5,
+    marginBottom: 15,
   },
   input: {
     width: 250,
@@ -39,6 +41,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
 });
+
 
 // error callback function for openDatabase operation
 const errorCB = (err) => {
@@ -54,25 +57,6 @@ const db = SQLite.openDatabase({
   name: 'foodsDB', readOnly: true, createFromLocation: 1,
 }, successCB, errorCB);
 
-// 'food' being table name, item(0) is column names
-// so we set limit 2 to retrieve the first food values
-db.executeSql('SELECT * FROM food LIMIT 2', [],
-(results) => {
-  console.log(results.rows.item(1));
-},
-(error) => {
-  console.log(error);
-});
-
-// sql query that counts db rows
-db.executeSql('SELECT count(*) AS mycount FROM food', [],
-(rs) => {
-  console.log(`Record count (expected to be 8791): ${rs.rows.item(0).mycount}`);
-},
-(error) => {
-  console.log(`SELECT SQL statement ERROR: ${error.message}`);
-});
-
 
 class App extends Component {
   constructor(props) {
@@ -85,24 +69,23 @@ class App extends Component {
 
   // onChangeTextHandler arrow function (automatically binds context)
   onChangeTextHandler = (text) => {
-    const foods = this.searchFood(text);
-    this.setState({ value: text, foods });
+    this.setState({ value: text });
+    this.searchFood(text);
   }
 
   searchFood = (food) => {
     // retireved foods will be pushed into this array
     const foodsArray = [];
 
-    // if food equals to empty string, do nothing and return empty foodsArray
-    if (food === '') {
-      return foodsArray;
-    }
-
     // regex that indicates a string containing substring (searchTerm)
     const searchTerm = `%${food}%`;
+    // search limit
+    const limit = 20;
+    // search offset
+    const offset = 1;
     // LIKE means we're not doing an exact match (column = value),
     // but doing some more fuzzy matching.
-    const query = `SELECT * FROM food WHERE desc LIKE '${searchTerm}' LIMIT 20`;
+    const query = `SELECT * FROM food WHERE desc LIKE '${searchTerm}' LIMIT ${limit} OFFSET ${offset}`;
 
     db.executeSql(query, [],
     (results) => {
@@ -117,14 +100,19 @@ class App extends Component {
         // push every object to foodsArray
         foodsArray.push(results.rows.item(i));
       }
+
+      // if food searchTerm equals to empty string, set state.food to an empty array
+      if (food === '') {
+        this.setState({ foods: [] });
+      } else {
+        // set state.food to query results pushed in foodsArray
+        // console.log(foodsArray);
+        this.setState({ foods: foodsArray });
+      }
     },
     (error) => {
       console.log(error);
     });
-
-    // return query results in foodsArray
-    // console.log(foodsArray);
-    return foodsArray;
   }
 
   render() {
@@ -151,9 +139,8 @@ class App extends Component {
         <Text style={styles.text}>
           react-native-sqlite-storage implementation
         </Text>
-        <Text style={styles.text}>
-          {this.state.value}
-        </Text>
+
+        <FoodList foods={this.state.foods} />
       </View>
     );
   }
